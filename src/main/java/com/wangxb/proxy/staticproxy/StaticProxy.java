@@ -1,13 +1,26 @@
 package com.wangxb.proxy.staticproxy;
 
+
+import org.junit.Test;
+
 /**
  * 动态代理示例
  * @author wangxb
  * @version 1.0
  * @date 2019-9-10 16:28
  **/
-public class DynamicProxy {
+public class StaticProxy {
 
+    @Test
+    public void testStaticProxy() {
+        //声明一个被代理类
+        //UserManager userManager = new UserManagerImpl();
+        UserManager userManagerProxy = new UserManagerImplProxy(new UserManagerImpl());
+        userManagerProxy.addUser("1000", "张珊");
+        userManagerProxy.delUser("1000");
+        userManagerProxy.findUser("1000");
+        userManagerProxy.modifyUser("1000", "张三");
+    }
 }
 interface UserManager {
     //添加用户

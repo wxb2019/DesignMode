@@ -12,7 +12,7 @@ import java.lang.reflect.Proxy;
  * @version 1.0
  * @date 2019-9-10 16:07
  **/
-public class StaticProxyTest {
+public class DynamicProxyTest {
     @Test
     public void testStaticProxy() {
         //声明一个被代理类
