@@ -1,6 +1,10 @@
-package com.wangxb.proxy;
+package com.wangxb.proxy.dynamicproxy;
 
 import org.junit.Test;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * 静态代理示例
@@ -13,7 +17,7 @@ public class StaticProxyTest {
     public void testStaticProxy() {
         //声明一个被代理类
         //UserManager userManager = new UserManagerImpl();
-        UserManager userManagerProxy = new UserManagerImplProxy(new UserManagerImpl());
+        UserManager userManagerProxy = (UserManager) new DynamicProxyFactory().getProxyInstance(new UserManagerImpl());
         userManagerProxy.addUser("1000", "张珊");
         userManagerProxy.delUser("1000");
         userManagerProxy.findUser("1000");
@@ -55,40 +59,31 @@ class UserManagerImpl implements UserManager {
     }
 }
 
-//声明代理类
-class UserManagerImplProxy implements UserManager {
+//声明一个创建代理对象的类,需要实现InvocationHandler接口，被代理对象在invoke方法中执行
+class DynamicProxyFactory implements InvocationHandler {
 
-    private UserManager userManager;
+    //声明原始类（被代理的类）
+    private Object targetObject;
 
-    //注入被代理类
-    public UserManagerImplProxy(UserManager userManager) {
-        this.userManager = userManager;
+    //获取动态代理生成的代理类
+    public Object getProxyInstance(Object object) {
+        // 绑定被代理类
+        // 动态代理生成的类和原始类结构相同
+        this.targetObject = object;
+        return Proxy.newProxyInstance(object.getClass().getClassLoader(),
+                object.getClass().getInterfaces(), this);
     }
 
-    public void addUser(String userId, String username) {
-        //添加日志打印的功能
-        System.out.println("开始添加用户");
-        System.out.println(this.getClass().getSimpleName()+"."+Thread.currentThread().getStackTrace()[1].getMethodName());
-        System.out.println("添加用户成功");
-    }
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //对原方法调用前处理日志信息
+        System.out.println("执行方法前");
 
-    public void delUser(String userId) {
-        System.out.println("开始删除用户");
-        System.out.println(this.getClass().getSimpleName()+"."+Thread.currentThread().getStackTrace()[1].getMethodName());
-        System.out.println("删除用户成功");
-    }
+        //调用被代理类方法
+        Object obj = method.invoke(targetObject, args);
 
-    public String findUser(String userId) {
-        System.out.println("开始查找用户");
-        System.out.println(this.getClass().getSimpleName()+"."+Thread.currentThread().getStackTrace()[1].getMethodName());
-        System.out.println("查找用户成功");
-        return this.getClass().getSimpleName()+"."+Thread.currentThread().getStackTrace()[1].getMethodName();
-    }
-
-    public void modifyUser(String userId, String username) {
-        System.out.println("开始修改用户");
-        System.out.println(this.getClass().getSimpleName()+"."+Thread.currentThread().getStackTrace()[1].getMethodName());
-        System.out.println("修改用户成功");
+        //调用原方法后处理日志信息
+        System.out.println("执行方法后");
+        return obj;
     }
 }
 
